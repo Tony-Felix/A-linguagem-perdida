@@ -1,0 +1,5 @@
+[
+    { "nome": "Variáveis", "descricao": "Armazenam valores que podem mudar durante a execução do programa." },
+    { "nome": "Funções", "descricao": "Blocos de código reutilizáveis que executam uma tarefa." },
+    { "nome": "Loops", "descricao": "Estruturas que repetem instruções enquanto uma condição for verdadeira." }
+]
