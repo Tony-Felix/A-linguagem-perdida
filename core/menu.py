@@ -1,5 +1,6 @@
 import pygame
 from config import settings
+from core.colors import CIANO, BRANCO, AMARELO, SOMBRA, SOMBRA3D
 from core.intro import Intro
 from core.utils import aplicar_ondulacao
 
@@ -24,12 +25,12 @@ class Menu:
         self.fonte_footer = pygame.font.SysFont("Arial", 40, italic=True)
 
         # Cores
-        self.cor_normal = (255, 255, 255)
-        self.cor_selecionada = (0, 255, 255)  # ciano
-        self.cor_sombra = (30, 30, 30)
-        self.cor_footer = (220, 220, 0)
-        self.cor_titulo_principal = (0, 255, 255)  # texto principal
-        self.cor_titulo_sombra_3d = (0, 100, 150)  # sombra do relevo 3D
+        self.cor_normal = BRANCO
+        self.cor_selecionada = CIANO
+        self.cor_sombra = SOMBRA
+        self.cor_footer = AMARELO
+        self.cor_titulo_principal = CIANO
+        self.cor_titulo_sombra_3d = SOMBRA3D
 
         # Offsets de sombra
         self.sombra_dx = 3
@@ -47,7 +48,6 @@ class Menu:
         # Blink do rodapé
         self.footer_visivel = True
         self.tempo_inicio = pygame.time.get_ticks()
-        self.delay_inicial = 3000
         self.blink_interval = 3000
         self.ultimo_blink = 0
         self.delay_passado = False
@@ -67,19 +67,27 @@ class Menu:
 
         # --- ONDULAÇÃO ---
         self.tempo_menu_completo = None  # guarda quando menu terminou
-        self.aplicar_ondulacao = False   # flag para ativar efeito
-        self.duracao_ondulacao = 300     # duração do efeito em ms
-        self.ciclo_ondulacao = 5000      # ciclo do efeito, igual Opening
+        self.aplicar_ondulacao = False  # flag para ativar efeito
+        self.duracao_ondulacao = 300  # duração do efeito em ms
+        self.ciclo_ondulacao = 5000  # ciclo do efeito
+        self.inicio_ciclo_ondulacao = None  # <-- âncora do ciclo para disparo imediato
 
     def handle_events(self):
+        audio = self.jogo.audio
+
+        def tocar_efeito():
+            audio.play_sound("audio/efeitos/select_menu.ogg", volume=0.5)
+
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.jogo.quit_game()
             elif evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_DOWN:
                     self.selecionado = (self.selecionado + 1) % len(self.opcoes)
+                    tocar_efeito()
                 elif evento.key == pygame.K_UP:
                     self.selecionado = (self.selecionado - 1) % len(self.opcoes)
+                    tocar_efeito()
                 elif evento.key == pygame.K_RETURN:
                     self.executar_opcao()
 
@@ -130,13 +138,10 @@ class Menu:
         # Ativa rodapé apenas se todas opções já alcançaram
         self.rodape_ativo = all(self.opcoes_alcancaram)
 
-        # Marca tempo quando menu ficou completo
-        if self.rodape_ativo and self.tempo_menu_completo is None:
-            self.tempo_menu_completo = agora
-
-        # Ativa ondulação 3s depois do menu completo
-        if self.tempo_menu_completo and agora - self.tempo_menu_completo >= 3000:
+        # Ativa ondulação assim que o rodapé aparece (sem esperar 3s)
+        if self.rodape_ativo and not self.aplicar_ondulacao:
             self.aplicar_ondulacao = True
+            self.inicio_ciclo_ondulacao = agora
 
     def draw(self):
         # --- FUNDO ---
@@ -206,7 +211,12 @@ class Menu:
         # --- ONDULAÇÃO CURTA ---
         if self.aplicar_ondulacao:
             tempo_ms = pygame.time.get_ticks()
-            if (tempo_ms % self.ciclo_ondulacao) < self.duracao_ondulacao:
+            if self.inicio_ciclo_ondulacao is None:
+                self.inicio_ciclo_ondulacao = tempo_ms  # <-- segurança
+            janela = (
+                tempo_ms - self.inicio_ciclo_ondulacao
+            ) % self.ciclo_ondulacao  # <--
+            if janela < self.duracao_ondulacao:  # <-- 300 ms desde o início do ciclo
                 frame = self.jogo.screen.copy()
                 frame = aplicar_ondulacao(frame, tempo_ms / 1000.0)
                 self.jogo.screen.blit(frame, (0, 0))

@@ -1,13 +1,13 @@
 import pygame
 import sys
 from config import settings
+from core.colors import FUNDO, PRETO
 from core.player import Jogador
 from core.item import Pergaminho
 from core.opening import Opening
 from core.utils import aplicar_ondulacao
 from core.menu import Menu
-
-# ADICIONADO: import da Intro
+from audio.audio_manager import AudioManager
 from core.intro import Intro
 
 
@@ -17,6 +17,7 @@ class Game:
     def __init__(self):
         Game.instancia = self
         pygame.init()
+
         self.screen = pygame.display.set_mode((settings.LARGURA, settings.ALTURA))
         pygame.display.set_caption("NINGUÉM SABE PROGRAMAR - Protótipo")
         self.clock = pygame.time.Clock()
@@ -45,6 +46,10 @@ class Game:
         self.intro = Intro(self)
         self.menu = Menu(self)
         self.abertura = Opening(self.screen, self)
+
+        # ADICIONADO: gerenciador de áudio
+        self.audio = AudioManager()
+        self.audio.play_music("assets/music/intro.wav", loop=-1, volume=0.5)
 
     def run(self):
         while True:
@@ -93,7 +98,7 @@ class Game:
     def _desenhar(self):
         # 1) Surface temporária
         temp_surface = pygame.Surface((settings.LARGURA, settings.ALTURA))
-        temp_surface.fill(settings.FUNDO)
+        temp_surface.fill(FUNDO)
 
         # 2) Desenha todos os sprites
         self.todos_sprites.draw(temp_surface)
@@ -101,7 +106,7 @@ class Game:
         # 3) Texto do conceito coletado
         if self.conceito_coletado:
             texto = self.fonte.render(
-                f"Conceito: {self.conceito_coletado}", True, settings.PRETO
+                f"Conceito: {self.conceito_coletado}", True, PRETO
             )
             temp_surface.blit(texto, (20, settings.ALTURA - 40))
 

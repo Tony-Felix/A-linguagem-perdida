@@ -1,6 +1,7 @@
 import pygame
 import random
 from config import settings
+from core.colors import CIANO, AZUL_OPENING
 from core.utils import aplicar_ondulacao  # importando do utils
 
 
@@ -15,9 +16,8 @@ class LetraBugada:
         r = random.random()
         self.y = int(self.altura * (r**2))
         self.char = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*")
-        COR_CIANO = (0, 255, 255)
-        COR_AZUL = (0, 200, 255)
-        self.cor = random.choice([COR_CIANO, COR_AZUL])
+
+        self.cor = random.choice([CIANO, AZUL_OPENING])
         self.velocidade = random.randint(1, 5)
 
     def update(self):

@@ -1,5 +1,6 @@
 import pygame
 from config import settings
+from core.colors import PRETO
 
 
 class Intro:
@@ -38,7 +39,7 @@ class Intro:
                 self.jogo.estado_atual = "menu"
 
     def draw(self):
-        self.jogo.screen.fill(settings.PRETO)
+        self.jogo.screen.fill(PRETO)
         logo_temp = self.logo.copy()
         logo_temp.set_alpha(self.alpha)
         self.jogo.screen.blit(logo_temp, self.logo_rect)
